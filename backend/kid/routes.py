@@ -237,3 +237,58 @@ def remove_kid_restriction():
     db.session.commit()
 
     return json.dumps({'status': 1})
+
+
+@kid.route('/kid/remove', methods=['POST'])
+def add_new_kid():
+    """Adds a new kid account, links it to the database, and sends them their login credentials
+
+    Method Type: POST
+
+    Special Restrictions
+    --------------------
+    User must be logged in
+    User must be parent
+    User must be parent of the kid whose ID is provided
+    The provided Kid ID must be correct
+
+    JSON Parameters
+    ---------------
+    auth_token : str
+        Token to authorize the request - released when logging in
+    kid_name : str
+        Name of the kid being added
+    kid_email : str
+        Email of the kid being added
+
+    Returns
+    -------
+    JSON
+        status : int
+            Tells whether or not did the function work - 1 for success, 0 for failure
+    """
+    request_json = request.get_json()
+
+    auth_token = request_json['auth_token']
+    user = User.verify_auth_token(auth_token)
+
+    if user is None:
+        return json.dumps({'status': 0, 'error': "User Not Authenticated"})
+
+    if not user.isParent:
+        return json.dumps({'status': 0, 'error': "Access Denied"})
+
+    kid_id = request_json['kid_id']
+    kid_user = User.query.filter_by(id=kid_id).first()
+
+    if kid_user is None:
+        return json.dumps({'status': 0, 'error': "Invalid Kid ID"})
+
+    if kid_user.parent_id != user.id:
+        return json.dumps({'status': 0, 'error': "Kid is not linked to the logged in user"})
+
+    kid_user.isActive = False
+
+    db.session.commit()
+
+    return json.dumps({'status': 1})

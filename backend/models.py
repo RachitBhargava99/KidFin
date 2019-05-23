@@ -15,6 +15,7 @@ class User(db.Model, UserMixin):
     parent_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     isSnap = db.Column(db.Boolean, nullable=False, default=False)
     snapPic = db.Column(db.String(255), nullable=True)
+    isActive = db.Column(db.Boolean, nullable=False, default=True)
 
     def get_auth_token(self, expires_seconds=86400):
         s = Serializer(current_app.config['SECRET_KEY'], expires_seconds)
