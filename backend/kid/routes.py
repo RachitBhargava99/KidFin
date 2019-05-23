@@ -120,6 +120,8 @@ def add_kid_restriction():
         Must not be more than 127 characters long
     distance: int       OPTIONAL
         Distance from the primary location where the transaction can be made - defaults to UNLIMITED
+    cat_id: list of int OPTIONAL
+        ID's of categories to be whitelisted
     kid_id: int
         Internal ID of kid whose account need the restrictions
 
@@ -145,6 +147,7 @@ def add_kid_restriction():
     transaction = request_json.get('transaction')
     address = request_json.get('address')
     distance = request_json.get('distance')
+    cat_id = request_json.get('cat_id')
     kid_id = request_json['kid_id']
 
     kid_user = User.query.filter_by(id=kid_id).first()
@@ -155,21 +158,26 @@ def add_kid_restriction():
     if kid_user.parent_id != user.id:
         return json.dumps({'status': 0, 'error': "Kid is not linked to the logged in user"})
 
-    new_restriction = Restriction(kid_id=kid_id)
+    restrictions = []
+    if cat_id:
+        restrictions = [Restriction(kid_id=kid_id, cat_id=x) for x in cat_id]
+    else:
+        restrictions = [Restriction(kid_id=kid_id)]
 
     if bool(address) != bool(distance):
         return json.dumps({'status': 0,
                            'error': "Erroneous Request - Address and Distance must have values simultaneously"})
 
-    if amount:
-        new_restriction.amount = amount
-    if transaction:
-        new_restriction.transaction = transaction
-    if address:
-        new_restriction.primary_location = address
-        new_restriction.distance = distance
+    for new_restriction in restrictions:
+        if amount:
+            new_restriction.amount = amount
+        if transaction:
+            new_restriction.transaction = transaction
+        if address:
+            new_restriction.primary_location = address
+            new_restriction.distance = distance
+        db.session.add(new_restriction)
 
-    db.session.add(new_restriction)
     db.session.commit()
 
     return json.dumps({'status': 1})

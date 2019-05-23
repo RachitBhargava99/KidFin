@@ -47,12 +47,18 @@ class User(db.Model, UserMixin):
         return f"User ID {self.id}"
 
 
+class Category(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(127), nullable=False)
+
+
 class Restriction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     amount = db.Column(db.Integer, nullable=True)
     transaction = db.Column(db.Integer, nullable=True)
     primary_location = db.Column(db.String(127), nullable=True)
     distance = db.Column(db.Integer, nullable=True)
+    cat_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     isActive = db.Column(db.Boolean, nullable=False, default=True)
 
