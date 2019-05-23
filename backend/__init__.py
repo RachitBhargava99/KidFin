@@ -21,9 +21,11 @@ def create_app():
 ##    login_manager.init_app(app)
     mail.init_app(app)
 
-    from backend.events.routes import events
+    from backend.kid.routes import kid
+    from backend.transactions.routes import transactions
     from backend.users.routes import users
-    app.register_blueprint(events)
+    app.register_blueprint(kid)
+    app.register_blueprint(transactions)
     app.register_blueprint(users)
 
     db.create_all(app=app)

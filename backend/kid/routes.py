@@ -5,21 +5,20 @@ import json
 import requests
 from datetime import datetime, timedelta
 from flask_mail import Message
-from backend.events.utils import get_habit_activity_data, get_change_index, set_target
 import random
 import string
 import bcrypt
 
-events = Blueprint('events', __name__)
+kid = Blueprint('kid', __name__)
 
 
 # Checker to see whether or not is the server running
-@events.route('/event', methods=['GET'])
+@kid.route('/event', methods=['GET'])
 def checker():
     return "Hello"
 
 
-@events.route('/event/cat/add', methods=['POST'])
+@kid.route('/kid/add', methods=['POST'])
 def add_new_kid():
     """Adds a new kid account, links it to the database, and sends them their login credentials
 
