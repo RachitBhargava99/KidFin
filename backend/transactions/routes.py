@@ -41,19 +41,19 @@ def add_new_kid():
     if user is None:
         return json.dumps({'status': 0, 'error': "User Not Authenticated"})
 
-    transactions = []
+    all_transactions = []
 
     if user.isParent:
         all_users = User.query.filter_by(parent_id=user.id)
         for kid_user in all_users:
-            transactions += [{'name': kid_user.name,
+            all_transactions += [{'name': kid_user.name,
                               'amount': x.amount,
                               'merchant': Merchant.query.filter_by(id=x.merchant_id).first().name} for x in
                              Transaction.query.filter_by(user_id=kid_user.id)]
     else:
-        transactions += [{'name': user.name,
+        all_transactions += [{'name': user.name,
                           'amount': x.amount,
                           'merchant': Merchant.query.filter_by(id=x.merchant_id).first().name} for x in
                          Transaction.query.filter_by(user_id=user.id)]
 
-    return json.dumps({'status': 1, 'transactions': transactions})
+    return json.dumps({'status': 1, 'transactions': all_transactions})
