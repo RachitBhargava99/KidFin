@@ -32,6 +32,16 @@ def add_new_kid():
     JSON
         status : int
             Tells whether or not did the function work - 1 for success, 0 for failure
+        transactions: list of dicts of transactions
+            name: str
+                Name of the user who made the transaction
+            amount: int
+                Amount of transaction
+            merchant: str
+                Name of the merchant who initiated the transaction
+            date: str
+                Date of transaction
+
     """
     request_json = request.get_json()
 

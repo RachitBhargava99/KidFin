@@ -1,5 +1,5 @@
 from flask import Blueprint, request, current_app
-from backend.models import User
+from backend.models import User, Restriction
 from backend import db, mail
 import json
 import requests
@@ -92,3 +92,84 @@ KidFin Team'''
     mail.send(msg)
 
     return json.dumps({'status': 1, 'message': "Account Created Successfully!"})
+
+
+@kid.route('/kid/add_restriction', methods=['POST'])
+def add_new_kid():
+    """Shows all transactions linked to an account
+
+    Method Type: POST
+
+    Special Restrictions
+    --------------------
+    User must be logged in
+    User must be parent
+    User must be parent of the kid whose ID is provided
+    The provided Kid ID must be correct
+
+    JSON Parameters
+    ---------------
+    auth_token : str
+        Token to authorize the request - released when logging in
+    amount: int         OPTIONAL
+        Amount to limit each transaction to - defaults to UNLIMITED if nothing is provided
+    transaction: int    OPTIONAL
+        Maximum number of transactions allowed - defaults to UNLIMITED if nothing is provided
+    address: str        OPTIONAL
+        Address of the primary location
+        Must not be more than 127 characters long
+    distance: int       OPTIONAL
+        Distance from the primary location where the transaction can be made - defaults to UNLIMITED
+    kid_id: int
+        Internal ID of kid whose account need the restrictions
+
+    Returns
+    -------
+    JSON
+        status : int
+            Tells whether or not did the function work - 1 for success, 0 for failure
+
+    """
+    request_json = request.get_json()
+
+    auth_token = request_json['auth_token']
+    user = User.verify_auth_token(auth_token)
+
+    if user is None:
+        return json.dumps({'status': 0, 'error': "User Not Authenticated"})
+
+    if not user.isParent:
+        return json.dumps({'status': 0, 'error': "Access Denied"})
+
+    amount = request_json.get('amount')
+    transaction = request_json.get('transaction')
+    address = request_json.get('address')
+    distance = request_json.get('distance')
+    kid_id = request_json['kid_id']
+
+    kid_user = User.query.filter_by(id=kid_id).first()
+
+    if kid_user is None:
+        return json.dumps({'status': 0, 'error': "Incorret Kid ID"})
+
+    if kid_user.parent_id != user.id:
+        return json.dumps({'status': 0, 'error': "Kid is not linked to the logged in user"})
+
+    new_restriction = Restriction(kid_id=kid_id)
+
+    if bool(address) != bool(distance):
+        return json.dumps({'status': 0,
+                           'error': "Erroneous Request - Address and Distance must have values simultaneously"})
+
+    if amount:
+        new_restriction.amount = amount
+    if transaction:
+        new_restriction.transaction = transaction
+    if address:
+        new_restriction.primary_location = address
+        new_restriction.distance = distance
+
+    db.session.add(new_restriction)
+    db.session.commit()
+
+    return json.dumps({'status': 1})

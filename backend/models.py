@@ -48,15 +48,17 @@ class User(db.Model, UserMixin):
 
 class Restriction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String(1), nullable=False)
     amount = db.Column(db.Integer, nullable=True)
     transaction = db.Column(db.Integer, nullable=True)
+    primary_location = db.Column(db.String(127), nullable=True)
+    distance = db.Column(db.Integer, nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 
 class Merchant(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     merchant_id = db.Column(db.Integer, nullable=False)
-    restriction = db.Column(db.Integer, db.ForeignKey('restriction.id'), nullable=False)
+    restriction = db.Column(db.Integer, db.ForeignKey('restriction.id'), nullable=True)
 
 
 class Transaction(db.Model):
