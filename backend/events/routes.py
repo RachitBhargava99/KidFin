@@ -6,6 +6,9 @@ import requests
 from datetime import datetime, timedelta
 from flask_mail import Message
 from backend.events.utils import get_habit_activity_data, get_change_index, set_target
+import random
+import string
+import bcrypt
 
 events = Blueprint('events', __name__)
 
@@ -17,26 +20,24 @@ def checker():
 
 
 @events.route('/event/cat/add', methods=['POST'])
-def add_new_category():
-    """Adds a new category to the database
+def add_new_kid():
+    """Adds a new kid account, links it to the database, and sends them their login credentials
 
     Method Type: POST
 
     Special Restrictions
     --------------------
     User must be logged in
-    User must be admin
+    User must be parent
 
     JSON Parameters
     ---------------
     auth_token : str
         Token to authorize the request - released when logging in
-    cat_name : str
-        Name of the category to be added
-    cat_level : int
-        Level of the category you want to add
-    cat_ideal_num : int
-        Ideal number to be reached
+    kid_name : str
+        Name of the kid being added
+    kid_email : str
+        Email of the kid being added
 
     Returns
     -------
@@ -52,14 +53,43 @@ def add_new_category():
     if user is None:
         return json.dumps({'status': 0, 'error': "User Not Authenticated"})
 
-    if not user.isAdmin:
+    if not user.isParent:
         return json.dumps({'status': 0, 'error': "Access Denied"})
 
-    cat_name = request_json['cat_name']
-    cat_level = request_json['cat_level']
-    cat_ideal_num = request_json['cat_ideal_num']
-    new_cat = Category(name=cat_name, level=cat_level, ideal_num=cat_ideal_num)
-    db.session.add(new_cat)
+    kid_name = request_json['kid_name']
+    kid_email = request_json['kid_email']
+
+    random_password = ''.join(
+        random.choices(
+            string.digits + string.ascii_uppercase,
+            k=8
+        )
+    )
+    hashed_pwd = bcrypt.generate_password_hash(random_password).decode('utf-8')
+
+    kid_user = User(
+        name=kid_name,
+        email=kid_email,
+        password=hashed_pwd,
+        isParent=False,
+        accountId=user.accountId,
+        parent_id=user.id
+    )
+    db.session.add(kid_user)
     db.session.commit()
 
-    return json.dumps({'status': 1})
+    msg = Message('Investoreal Login Credentials', sender='rachitbhargava99@gmail.com', recipients=[kid_user.email])
+    msg.body = f'''Hi {kid_name},
+
+You have been added by your parent to their account. You may now log in using the credentials listed below:
+
+Username: {kid_email}
+Password: {random_password}
+
+Please be sure to keep this email secure.
+
+Cheers,
+KidFin Team'''
+    mail.send(msg)
+
+    return json.dumps({'status': 1, 'message': "Account Created Successfully!"})
