@@ -77,7 +77,7 @@ def add_new_kid():
     db.session.add(kid_user)
     db.session.commit()
 
-    msg = Message('Investoreal Login Credentials', sender='rachitbhargava99@gmail.com', recipients=[kid_user.email])
+    msg = Message('KidFin Login Credentials', sender='rachitbhargava99@gmail.com', recipients=[kid_user.email])
     msg.body = f'''Hi {kid_name},
 
 You have been added by your parent to their account. You may now log in using the credentials listed below:

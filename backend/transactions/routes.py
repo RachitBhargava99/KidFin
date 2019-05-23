@@ -47,13 +47,14 @@ def add_new_kid():
         all_users = User.query.filter_by(parent_id=user.id)
         for kid_user in all_users:
             all_transactions += [{'name': kid_user.name,
-                              'amount': x.amount,
-                              'merchant': Merchant.query.filter_by(id=x.merchant_id).first().name} for x in
-                             Transaction.query.filter_by(user_id=kid_user.id)]
+                                  'amount': x.amount,
+                                  'merchant': Merchant.query.filter_by(id=x.merchant_id).first().name} for x in
+                                 Transaction.query.filter_by(user_id=kid_user.id)]
     else:
         all_transactions += [{'name': user.name,
-                          'amount': x.amount,
-                          'merchant': Merchant.query.filter_by(id=x.merchant_id).first().name} for x in
-                         Transaction.query.filter_by(user_id=user.id)]
+                              'amount': x.amount,
+                              'merchant': Merchant.query.filter_by(id=x.merchant_id).first().name,
+                              'date': x.timestamp.strftime('%B %d, %Y')} for x in
+                             Transaction.query.filter_by(user_id=user.id)]
 
     return json.dumps({'status': 1, 'transactions': all_transactions})

@@ -64,3 +64,4 @@ class Transaction(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     amount = db.Column(db.Integer, nullable=False, default=0)
     merchant_id = db.Column(db.Integer, db.ForeignKey('merchant.id'), nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now())
