@@ -53,6 +53,7 @@ class Restriction(db.Model):
     primary_location = db.Column(db.String(127), nullable=True)
     distance = db.Column(db.Integer, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    isActive = db.Column(db.Boolean, nullable=False, default=True)
 
 
 class Merchant(db.Model):

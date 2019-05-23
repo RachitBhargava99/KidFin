@@ -95,8 +95,8 @@ KidFin Team'''
 
 
 @kid.route('/kid/add_restriction', methods=['POST'])
-def add_new_kid():
-    """Shows all transactions linked to an account
+def add_kid_restriction():
+    """Adds a new restriction to a kid account
 
     Method Type: POST
 
@@ -150,7 +150,7 @@ def add_new_kid():
     kid_user = User.query.filter_by(id=kid_id).first()
 
     if kid_user is None:
-        return json.dumps({'status': 0, 'error': "Incorret Kid ID"})
+        return json.dumps({'status': 0, 'error': "Invalid Kid ID"})
 
     if kid_user.parent_id != user.id:
         return json.dumps({'status': 0, 'error': "Kid is not linked to the logged in user"})
@@ -170,6 +170,70 @@ def add_new_kid():
         new_restriction.distance = distance
 
     db.session.add(new_restriction)
+    db.session.commit()
+
+    return json.dumps({'status': 1})
+
+
+@kid.route('/kid/remove_restriction', methods=['POST'])
+def remove_kid_restriction():
+    """Removes restriction from a kid account
+
+    Method Type: POST
+
+    Special Restrictions
+    --------------------
+    User must be logged in
+    User must be parent
+    User must be parent of the kid whose ID is provided
+    The provided Kid ID must be correct
+    The provided Restriction ID must be correct
+
+    JSON Parameters
+    ---------------
+    auth_token : str
+        Token to authorize the request - released when logging in
+    kid_id: int
+        Internal ID of kid whose account need the restrictions
+    restriction_id: int
+        Internal Restriction ID of the restriction that needs to be removed
+
+    Returns
+    -------
+    JSON
+        status : int
+            Tells whether or not did the function work - 1 for success, 0 for failure
+
+    """
+    request_json = request.get_json()
+
+    auth_token = request_json['auth_token']
+    user = User.verify_auth_token(auth_token)
+
+    if user is None:
+        return json.dumps({'status': 0, 'error': "User Not Authenticated"})
+
+    if not user.isParent:
+        return json.dumps({'status': 0, 'error': "Access Denied"})
+
+    kid_id = request_json['kid_id']
+    restriction_id = request_json['restriction_id']
+
+    kid_user = User.query.filter_by(id=kid_id).first()
+
+    if kid_user is None:
+        return json.dumps({'status': 0, 'error': "Invalid Kid ID"})
+
+    if kid_user.parent_id != user.id:
+        return json.dumps({'status': 0, 'error': "Kid is not linked to the logged in user"})
+
+    restriction = Restriction.query.filter_by(id=restriction_id).first()
+
+    if restriction is None:
+        return json.dumps({'status': 0, 'error': "Invalid Restriction ID"})
+
+    restriction.isActive = False
+
     db.session.commit()
 
     return json.dumps({'status': 1})
