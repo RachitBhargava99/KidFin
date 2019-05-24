@@ -3,7 +3,7 @@ from sqlalchemy import and_
 import random
 import math
 from backend import db
-from backend.models import Restriction
+from backend.models import Restriction, Merchant
 from gencoder.polycoder import super_encoder
 import requests
 from datetime import datetime
@@ -34,6 +34,15 @@ def get_merchant_information(merchantID):
     url = f"http://api.reimaginebanking.com/merchants/{merchantID}?key=bb72fd1c5dee869a93bd5c6ba281cadb"
 
     response = requests.get(url).json()
+
+    print(response)
+
+    existing_merchant = Merchant.query.filter_by(merchant_id=merchantID).first()
+
+    if existing_merchant is None:
+        new_merchant = Merchant(merchant_id=merchantID, name=response['name'])
+        db.session.add(new_merchant)
+        db.session.commit()
 
     return response["category"], [response['geocode']['lat'], response['geocode']['lng']]
 

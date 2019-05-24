@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from flask_mail import Message
 import random
 import string
-import bcrypt
+from backend import bcrypt
 from backend.kid.utils import transfer_money, add_account
 
 kid = Blueprint('kid', __name__)

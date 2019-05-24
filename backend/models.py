@@ -66,7 +66,8 @@ class Restriction(db.Model):
 
 class Merchant(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    merchant_id = db.Column(db.Integer, nullable=False)
+    merchant_id = db.Column(db.String(127), nullable=False)
+    name = db.Column(db.String(255), nullable=False)
     restriction = db.Column(db.Integer, db.ForeignKey('restriction.id'), nullable=True)
 
 
@@ -74,5 +75,5 @@ class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     amount = db.Column(db.Integer, nullable=False, default=0)
-    merchant_id = db.Column(db.Integer, db.ForeignKey('merchant.id'), nullable=False)
+    merchant_id = db.Column(db.String(127), nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now())
