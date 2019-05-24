@@ -12,6 +12,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(63), unique=False, nullable=False)
     isParent = db.Column(db.Boolean, nullable=False, default=True)
     accountId = db.Column(db.Integer, nullable=False, default=-1)
+    customerId = db.Column(db.Integer, nullable=False, default=-1)
     parent_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     isSnap = db.Column(db.Boolean, nullable=False, default=False)
     snapPic = db.Column(db.String(255), nullable=True)

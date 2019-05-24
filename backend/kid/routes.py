@@ -8,6 +8,7 @@ from flask_mail import Message
 import random
 import string
 import bcrypt
+from backend.kid.utils import transfer_money, add_account
 
 kid = Blueprint('kid', __name__)
 
@@ -62,7 +63,19 @@ def add_new_kid():
     init_amount = request_json['init_amount']
 
     # Create a Kid account using Nessie
+    new_account_number = ''.join(
+        random.choices(
+            string.digits,
+            k=16
+        )
+    )
+
+    new_account_id = add_account(user.customerId, f"Kid Card - {kid_name}", 0, new_account_number)
     # Initiate a transfer between the parent account and the kid account using Nessie
+    init_money_transfer_status = transfer_money(user.accountId, new_account_id, init_amount)
+
+    if not init_money_transfer_status:
+        return json.dumps({'status': 0, 'error': "The parent account does not have enough money."})
 
     random_password = ''.join(
         random.choices(
@@ -77,7 +90,7 @@ def add_new_kid():
         email=kid_email,
         password=hashed_pwd,
         isParent=False,
-        accountId=user.accountId,
+        accountId=new_account_id,
         parent_id=user.id
     )
     db.session.add(kid_user)
