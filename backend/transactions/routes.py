@@ -80,7 +80,6 @@ def process_transaction():
 
     Special Restrictions
     --------------------
-    User must be logged in
     Account restrictions must not prevent the transaction
     Account must have enough funds for the transaction
 
