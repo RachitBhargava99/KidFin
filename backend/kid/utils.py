@@ -1,44 +1,34 @@
 from datetime import timedelta
-from backend.models import Activity, Habit
 from sqlalchemy import and_
 import random
 import math
 from backend import db
+from datetime import datetime
+import requests
 
 
-def get_habit_activity_data(test_date, num_days, habit_id):
-    num_days_later = test_date + timedelta(days=num_days + 1)
+def transfer_money(payer_accountID, payee_accountID, amount, date=datetime.now().strftime('%Y-%d-%m')):
+    #   Purpose: Transfers money from payer to payee
+    #
+    #   Inputs:
+    #   payer_accountID (string)
+    #   payee_accountID (string)
+    #   amount (string)
+    #   date (optional string: YYYY-DD-MM)
+    #   assumptions- medium: balance, status: pending, description: ""
 
-    all_activities = Activity.query.filter(and_(Activity.habit_id == habit_id,
-                                                and_(Activity.timestamp >= test_date,
-                                                     Activity.timestamp <= num_days_later)))
+    url = "http://api.reimaginebanking.com/accounts/" + payer_accountID +\
+          "/transfers?key=bb72fd1c5dee869a93bd5c6ba281cadb"
 
-    datewise_activity_map = {}
+    payload = {
+        "medium": "balance",
+        "payee_id": payee_accountID,
+        "amount": amount,
+        "transaction_date": date,
+        "status": "pending",
+        "description": " "
+    }
 
-    for each_activity in all_activities:
-        if datewise_activity_map.get(each_activity.timestamp.strftime('%m-%d-%y')) is None:
-            datewise_activity_map[each_activity.timestamp.strftime('%m-%d-%y')] = 1
-        else:
-            datewise_activity_map[each_activity.timestamp.strftime('%m-%d-%y')] += 1
+    response = requests.post(url, json=payload)
 
-    return datewise_activity_map
-
-
-def get_change_index(cat_level, pref_level):
-    init_level = 0.99
-
-    converted_pref_level = (1 - ((1 - pref_level / 3) ** 4))
-
-    converted_cat_level = (1 - ((1 - cat_level / 7) ** 2))
-
-    change_index = init_level * converted_pref_level * converted_cat_level
-
-    return change_index
-
-
-def set_target(habit_id):
-    habit = Habit.query.filter_by(id=habit_id).first()
-    curr_num = habit.curr_num
-    new_target = math.floor(curr_num + random.random())
-    habit.curr_target = new_target
-    db.session.commit()
+    return response.json()['code'] == 201
