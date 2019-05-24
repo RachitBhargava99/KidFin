@@ -8,7 +8,8 @@ from flask_mail import Message
 import random
 import string
 import bcrypt
-from backend.transactions.utils import satisfy_amount_condition, satisfy_gps_condition
+from backend.transactions.utils import satisfy_amount_condition, satisfy_gps_condition, get_merchant_category,\
+    process_purchase
 
 transactions = Blueprint('transactions', __name__)
 
@@ -108,10 +109,11 @@ def process_transaction():
         return json.dumps({'status': 0, 'error': "The provided account does not exist."})
 
     # Get Merchant Details using Nessie
+    merchant_cats = get_merchant_category(merchant_id)
 
     if user.isParent:
         # Process transaction using Nessie
-        pass
+        transaction_status = process_purchase(user.accountId, merchant_id, amount)
     else:
         all_restrictions = Restriction.query.filter_by(user_id=user.id)
 
@@ -119,16 +121,19 @@ def process_transaction():
         gps_check = False
 
         for restriction in all_restrictions:
-            if not satisfy_amount_condition(restriction, amount, curr_coordinates):
+            if not satisfy_amount_condition(restriction, amount):
                 return json.dumps({'status': 0, 'error': "Card Restricted"})
             if restriction.cat_id in merchant_cats and not cat_check:
                 cat_check = True
             if satisfy_gps_condition(restriction, curr_coordinates) and not gps_check:
                 gps_check = True
 
-        if check:
-            # Process transaction using Nessie
+        if cat_check and gps_check:
+            transaction_status = process_purchase(user.accountId, merchant_id, amount)
         else:
             return json.dumps({'status': 0, 'error': "Card Restricted"})
+
+    if transaction_status:
+        return json.dumps({'status': 0, 'error': "Transaction Failure"})
 
     return json.dumps({'status': 1})
