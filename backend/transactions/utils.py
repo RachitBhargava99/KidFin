@@ -133,6 +133,19 @@ def getAccountData(customerID):
     return response.text
 
 
+def getMerchantName(merchantID):
+    #   Purpose: Returns name of mercchent
+    #
+    #   Inputs:
+    #   merchantID (string)
+
+    url = "http://api.reimaginebanking.com/merchants/" + merchantID + "?key=bb72fd1c5dee869a93bd5c6ba281cadb"
+
+    response = requests.get(url)
+
+    return (response.json())["name"]
+
+
 def getPurchaseData(accountID):
     #   Purpose: Returns transaction data for the inputted account
     #
@@ -143,4 +156,10 @@ def getPurchaseData(accountID):
 
     response = requests.get(url)
 
-    return response.text
+    purchaseDataList = []
+
+    for i in range(len(response.json())):
+        merchantID = response.json()[i]["merchant_id"]
+        purchaseDataList += [[getMerchantName(merchantID), response.json()[i]["amount"]]]
+
+    return purchaseDataList
