@@ -47,4 +47,17 @@ def transferMoney(payer_accountID, payee_accountID, amount, date = "2019-05-23")
 
     response = requests.post(url, json=payload)
 
-    print(response.text)
+    return response.text
+
+
+def getMerchantCategory(merchantID):
+    #   Purpose: Returns categories merchant belongs to in a list
+    #
+    #   Inputs:
+    #   merchantID (string)
+
+    url = "http://api.reimaginebanking.com/merchants/59394f0aceb8abe242517929?key=bb72fd1c5dee869a93bd5c6ba281cadb"
+
+    response = requests.get(url)
+
+    return (response.json())["category"]
