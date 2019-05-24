@@ -87,3 +87,47 @@ def addAccount(customerID, accountName, balance, accountNumber):
     response = requests.post(url, json=payload)
 
     return response.text
+
+
+def createCustomer(firstName, lastName, streetNum, streetName, city, state, zip):
+    #   Purpose: Creates a customer with name and address information
+    #
+    #   Inputs:
+    #   firstName (string)
+    #   lastName (string)
+    #   streetNum (string)
+    #   streetName (string)
+    #   city (string)
+    #   state (string) - two letter abbreviated state code
+    #   zip (string) - five digit zip code
+
+    url = "http://api.reimaginebanking.com/customers?key=bb72fd1c5dee869a93bd5c6ba281cadb"
+
+    payload = {
+        "first_name": firstName,
+        "last_name": lastName,
+        "address": {
+            "street_number": streetNum,
+            "street_name": streetName,
+            "city": city,
+            "state": state,
+            "zip": zip
+        }
+    }
+
+    response = requests.post(url, json=payload)
+
+    return response.text
+
+
+def getAccountData(customerID):
+    #   Purpose: Returns information for all accounts associated with the given customerID
+    #
+    #   Inputs:
+    #   customerID (string)
+
+    url = "http://api.reimaginebanking.com/customers/" + customerID + "/accounts?key=bb72fd1c5dee869a93bd5c6ba281cadb"
+
+    response = requests.get(url)
+
+    return response.text
