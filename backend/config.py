@@ -8,6 +8,8 @@ class Config:
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 465
     MAIL_USE_SSL = True
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     PROJECT_ID = os.environ.get('PROJECT_ID')
     DATA_BACKEND = os.environ.get('DATA_BACKEND')
     CLOUDSQL_USER = os.environ.get('CLOUDSQL_USER')

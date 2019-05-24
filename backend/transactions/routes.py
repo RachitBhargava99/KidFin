@@ -62,12 +62,11 @@ def view_transactions():
                                   'amount': x.amount,
                                   'merchant': Merchant.query.filter_by(id=x.merchant_id).first().name} for x in
                                  Transaction.query.filter_by(user_id=kid_user.id)]
-    else:
-        all_transactions += [{'name': user.name,
-                              'amount': x.amount,
-                              'merchant': Merchant.query.filter_by(id=x.merchant_id).first().name,
-                              'date': x.timestamp.strftime('%B %d, %Y')} for x in
-                             Transaction.query.filter_by(user_id=user.id)]
+    all_transactions += [{'name': user.name,
+                          'amount': x.amount,
+                          'merchant': Merchant.query.filter_by(merchant_id=x.merchant_id).first().name,
+                          'date': x.timestamp.strftime('%B %d, %Y')} for x in
+                         Transaction.query.filter_by(user_id=user.id)]
 
     return json.dumps({'status': 1, 'transactions': all_transactions})
 
@@ -137,5 +136,9 @@ def process_transaction():
 
     if transaction_status:
         return json.dumps({'status': 0, 'error': "Transaction Failure"})
+
+    new_transaction = Transaction(user_id=user.id, amount=amount, merchant_id=merchant_id)
+    db.session.add(new_transaction)
+    db.session.commit()
 
     return json.dumps({'status': 1})

@@ -12,3 +12,5 @@ env_variables:
   CLOUDSQL_PASSWORD: ''
   CLOUDSQL_DATABASE: 'kidfin_sql'
   CLOUDSQL_CONNECTION_NAME: 'thinger:us-east1:kidfin'
+  MAIL_PASSWORD: 'Ananya88#'
+  MAIL_USERNAME: 'rachitbhargava99@gmail.com'

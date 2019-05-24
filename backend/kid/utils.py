@@ -7,7 +7,7 @@ from datetime import datetime
 import requests
 
 
-def transfer_money(payer_accountID, payee_accountID, amount, date=datetime.now().strftime('%Y-%d-%m')):
+def transfer_money(payer_accountID, payee_accountID, amount, date=datetime.now().strftime('%Y-%m-%d')):
     #   Purpose: Transfers money from payer to payee
     #
     #   Inputs:
