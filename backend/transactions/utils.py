@@ -7,6 +7,7 @@ from backend.models import Restriction, Merchant
 from gencoder.polycoder import super_encoder
 import requests
 from datetime import datetime
+import logging
 
 
 def satisfy_amount_condition(restriction, amount):
@@ -21,6 +22,7 @@ def satisfy_gps_condition(restriction, coordinates):
         f'origins={restriction.primary_location}&destinations=enc:{curr_coordinates}:&' \
         f'key=AIzaSyAhC98vcXbcu6cXoLWd4Dh0p1xNRtZ7xf0'
     maps_data = requests.get(url).json()
+    print(maps_data)
     distance = maps_data['rows'][0]['elements'][0]['distance']['value'] / 1000
     return restriction.distance >= distance
 
@@ -35,7 +37,8 @@ def get_merchant_information(merchantID):
 
     response = requests.get(url).json()
 
-    print(response)
+#    print(response)
+#    print(merchantID)
 
     existing_merchant = Merchant.query.filter_by(merchant_id=merchantID).first()
 
@@ -47,14 +50,14 @@ def get_merchant_information(merchantID):
     return response["category"], [response['geocode']['lat'], response['geocode']['lng']]
 
 
-def process_purchase(accountID, merchantID, amount, date=datetime.now().strftime('%Y-%d-%m')):
+def process_purchase(accountID, merchantID, amount, date=datetime.now().strftime('%Y-%m-%d')):
     #   Purpose: Processes the purchase between the account and merchant
     #
     #   Inputs:
     #   accountID (string)
     #   merchantID (string)
     #   amount (string)
-    #   date (optional string: YYYY-DD-MM)
+    #   date (optional string: YYYY-MM-DD)
     #   assumptions- medium: balance, status: pending, description: " "
 
     url = "http://api.reimaginebanking.com/accounts/" + accountID + "/purchases?key=bb72fd1c5dee869a93bd5c6ba281cadb"
@@ -69,6 +72,9 @@ def process_purchase(accountID, merchantID, amount, date=datetime.now().strftime
     }
 
     response = requests.post(url, json=payload)
+
+    print(response.json())
+    print(f"Account ID: {accountID}, Merchant ID: {merchantID}")
 
     return response.json()['code'] == 201
 
@@ -155,7 +161,7 @@ def getMerchantName(merchantID):
     return (response.json())["name"]
 
 
-def getPurchaseData(accountID):
+def get_purchase_data(accountID):
     #   Purpose: Returns transaction data for the inputted account
     #
     #   Inputs:
@@ -163,12 +169,38 @@ def getPurchaseData(accountID):
 
     url = "http://api.reimaginebanking.com/accounts/" + accountID + "/purchases?key=bb72fd1c5dee869a93bd5c6ba281cadb"
 
-    response = requests.get(url)
+    response = requests.get(url).json()
 
     purchaseDataList = []
 
-    for i in range(len(response.json())):
-        merchantID = response.json()[i]["merchant_id"]
-        purchaseDataList += [[getMerchantName(merchantID), response.json()[i]["amount"], response.json()[i]["purchase_date"]]]
+    print(response)
+
+    for i in range(len(response)):
+        merchantID = response[i]["merchant_id"]
+        if response[i]['status'] == "executed":
+            purchaseDataList += [[getMerchantName(merchantID), response[i]["amount"], response[i]["purchase_date"]]]
 
     return purchaseDataList
+
+
+def has_balance(accountID, amount):
+    url = "http://api.reimaginebanking.com/accounts/" + accountID + "?key=bb72fd1c5dee869a93bd5c6ba281cadb"
+
+    response = requests.get(url).json()
+
+    print(response)
+
+    account_balance = response['balance']
+
+    return account_balance >= amount
+
+
+def get_curr_balance(accountID):
+
+    url = "http://api.reimaginebanking.com/accounts/" + accountID + "?key=bb72fd1c5dee869a93bd5c6ba281cadb"
+
+    response = requests.get(url).json()
+
+    account_balance = response['balance']
+
+    return account_balance

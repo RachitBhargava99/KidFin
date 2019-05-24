@@ -30,6 +30,7 @@ def transfer_money(payer_accountID, payee_accountID, amount, date=datetime.now()
     }
 
     response = requests.post(url, json=payload)
+    print(response.json())
 
     return response.json()['code'] == 201
 

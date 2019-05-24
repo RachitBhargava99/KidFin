@@ -96,21 +96,21 @@ def add_new_kid():
     db.session.add(kid_user)
     db.session.commit()
 
-    msg = Message('KidFin Login Credentials', sender='rachitbhargava99@gmail.com', recipients=[kid_user.email])
-    msg.body = f'''Hi {kid_name},
+#    msg = Message('KidFin Login Credentials', sender='rachitbhargava99@gmail.com', recipients=[kid_user.email])
+#    msg.body = f'''Hi {kid_name},
 
-You have been added by your parent to their account. You may now log in using the credentials listed below:
+#You have been added by your parent to their account. You may now log in using the credentials listed below:
 
-Username: {kid_email}
-Password: {random_password}
+#Username: {kid_email}
+#Password: {random_password}
 
-Please be sure to keep this email secure.
+#Please be sure to keep this email secure.
 
-Cheers,
-KidFin Team'''
-    mail.send(msg)
+#Cheers,
+#KidFin Team'''
+#    mail.send(msg)
 
-    return json.dumps({'status': 1, 'message': "Account Created Successfully!"})
+    return json.dumps({'status': 1, 'message': "Account Created Successfully!", 'email': kid_email, 'password': random_password})
 
 
 @kid.route('/kid/add_restriction', methods=['POST'])
@@ -177,11 +177,16 @@ def add_kid_restriction():
     if kid_user.parent_id != user.id:
         return json.dumps({'status': 0, 'error': "Kid is not linked to the logged in user"})
 
+    old_restrictions = Restriction.query.filter_by(user_id=kid_user.id, isActive=True)
+    for restriction in old_restrictions:
+        restriction.isActive = False
+    db.session.commit()
+
     restrictions = []
     if cat_id:
-        restrictions = [Restriction(kid_id=kid_id, cat_id=x) for x in cat_id]
+        restrictions = [Restriction(user_id=kid_id, cat_id=x) for x in cat_id]
     else:
-        restrictions = [Restriction(kid_id=kid_id)]
+        restrictions = [Restriction(user_id=kid_id)]
 
     if bool(address) != bool(distance):
         return json.dumps({'status': 0,
@@ -319,3 +324,40 @@ def remove_kid():
     db.session.commit()
 
     return json.dumps({'status': 1})
+
+
+@kid.route('/kid/all', methods=['POST'])
+def get_all_kids():
+    """Adds a new kid account, links it to the database, and sends them their login credentials
+
+    Method Type: POST
+
+    Special Restrictions
+    --------------------
+    User must be logged in
+    User must be parent
+
+    JSON Parameters
+    ---------------
+    auth_token : str
+        Token to authorize the request - released when logging in
+
+    Returns
+    -------
+    JSON
+        status : int
+            Tells whether or not did the function work - 1 for success, 0 for failure
+    """
+    request_json = request.get_json()
+
+    auth_token = request_json['auth_token']
+    user = User.verify_auth_token(auth_token)
+
+    if user is None:
+        return json.dumps({'status': 0, 'error': "User Not Authenticated"})
+
+    kids = User.query.filter_by(parent_id=user.id)
+
+    all_kids = [{'id': x.id, 'name': x.name} for x in kids]
+
+    return json.dumps({'status': 1, 'kids': all_kids})
