@@ -131,3 +131,16 @@ def getAccountData(customerID):
     response = requests.get(url)
 
     return response.text
+
+
+def getPurchaseData(accountID):
+    #   Purpose: Returns transaction data for the inputted account
+    #
+    #   Inputs:
+    #   account (string)
+
+    url = "http://api.reimaginebanking.com/accounts/" + accountID + "/purchases?key=bb72fd1c5dee869a93bd5c6ba281cadb"
+
+    response = requests.get(url)
+
+    return response.text
