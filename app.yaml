@@ -1,4 +1,4 @@
-service: habby
+service: kidfin
 runtime: python37
 entrypoint: gunicorn -t 120 -b :$PORT run:app
 
@@ -10,5 +10,5 @@ env_variables:
   DATA_BACKEND: 'cloudsql'
   CLOUDSQL_USER: 'root'
   CLOUDSQL_PASSWORD: ''
-  CLOUDSQL_DATABASE: 'habby_sql'
-  CLOUDSQL_CONNECTION_NAME: 'thinger:us-east1:habby'
+  CLOUDSQL_DATABASE: 'kidfin_sql'
+  CLOUDSQL_CONNECTION_NAME: 'thinger:us-east1:kidfin'
