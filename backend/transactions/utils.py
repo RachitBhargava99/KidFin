@@ -62,3 +62,72 @@ def process_purchase(accountID, merchantID, amount, date=datetime.now().strftime
     response = requests.post(url, json=payload)
 
     return response.json()['code'] == 201
+
+
+def addAccount(customerID, accountName, balance, accountNumber):
+    #   Purpose: Creates an account with a given customerID
+    #
+    #   Inputs:
+    #   customerID (string)
+    #   account_name (string)
+    #   balance (integer)
+    #   account_number (string) - a 16 digit string that is essentially the 'credit card number'; make it anything
+    #   assumptions- type: checking, rewards: 0
+
+    url = "http://api.reimaginebanking.com/customers/" + customerID + "/accounts?key=bb72fd1c5dee869a93bd5c6ba281cadb"
+
+    payload = {
+        "type": "Checking",
+        "nickname": accountName,
+        "rewards": 0,
+        "balance": balance,
+        "account_number": accountNumber
+    }
+
+    response = requests.post(url, json=payload)
+
+    return response.text
+
+
+def createCustomer(firstName, lastName, streetNum, streetName, city, state, zip):
+    #   Purpose: Creates a customer with name and address information
+    #
+    #   Inputs:
+    #   firstName (string)
+    #   lastName (string)
+    #   streetNum (string)
+    #   streetName (string)
+    #   city (string)
+    #   state (string) - two letter abbreviated state code
+    #   zip (string) - five digit zip code
+
+    url = "http://api.reimaginebanking.com/customers?key=bb72fd1c5dee869a93bd5c6ba281cadb"
+
+    payload = {
+        "first_name": firstName,
+        "last_name": lastName,
+        "address": {
+            "street_number": streetNum,
+            "street_name": streetName,
+            "city": city,
+            "state": state,
+            "zip": zip
+        }
+    }
+
+    response = requests.post(url, json=payload)
+
+    return response.text
+
+
+def getAccountData(customerID):
+    #   Purpose: Returns information for all accounts associated with the given customerID
+    #
+    #   Inputs:
+    #   customerID (string)
+
+    url = "http://api.reimaginebanking.com/customers/" + customerID + "/accounts?key=bb72fd1c5dee869a93bd5c6ba281cadb"
+
+    response = requests.get(url)
+
+    return response.text
