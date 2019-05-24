@@ -9,3 +9,4 @@ pymysql
 sqlalchemy
 geocoder
 Flask-Testing
+gencoder

@@ -37,6 +37,8 @@ def add_new_kid():
         Name of the kid being added
     kid_email : str
         Email of the kid being added
+    init_amount : int
+        Amount that needs to be transferred to the kid
 
     Returns
     -------
@@ -57,6 +59,10 @@ def add_new_kid():
 
     kid_name = request_json['kid_name']
     kid_email = request_json['kid_email']
+    init_amount = request_json['init_amount']
+
+    # Create a Kid account using Nessie
+    # Initiate a transfer between the parent account and the kid account using Nessie
 
     random_password = ''.join(
         random.choices(
@@ -248,7 +254,7 @@ def remove_kid_restriction():
 
 
 @kid.route('/kid/remove', methods=['POST'])
-def add_new_kid():
+def remove_kid():
     """Adds a new kid account, links it to the database, and sends them their login credentials
 
     Method Type: POST
@@ -264,8 +270,8 @@ def add_new_kid():
     ---------------
     auth_token : str
         Token to authorize the request - released when logging in
-    kid_name : str
-        Name of the kid being added
+    kid_id : int
+        ID of the Kid account to be removed
     kid_email : str
         Email of the kid being added
 

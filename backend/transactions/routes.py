@@ -1,5 +1,5 @@
 from flask import Blueprint, request, current_app
-from backend.models import User, Transaction, Merchant
+from backend.models import User, Transaction, Merchant, Restriction
 from backend import db, mail
 import json
 import requests
@@ -8,12 +8,13 @@ from flask_mail import Message
 import random
 import string
 import bcrypt
+from backend.transactions.utils import satisfy_amount_condition, satisfy_gps_condition
 
 transactions = Blueprint('transactions', __name__)
 
 
 @transactions.route('/transactions/view', methods=['POST'])
-def add_new_kid():
+def view_transactions():
     """Shows all transactions linked to an account
 
     Method Type: POST
@@ -68,3 +69,66 @@ def add_new_kid():
                              Transaction.query.filter_by(user_id=user.id)]
 
     return json.dumps({'status': 1, 'transactions': all_transactions})
+
+
+@transactions.route('/transactions/process', methods=['POST'])
+def process_transaction():
+    """Processes a new transaction
+
+    Method Type: POST
+
+    Special Restrictions
+    --------------------
+    User must be logged in
+
+    JSON Parameters
+    ---------------
+    accountId : str
+        Account ID to debit
+    amount : double
+        Amount to debit
+
+    Returns
+    -------
+    JSON
+        status : int
+            Tells whether or not did the function work - 1 for success, 0 for failure
+
+    """
+    request_json = request.get_json()
+
+    accountId = request_json['accountId']
+    amount = request_json['amount']
+    curr_coordinates = request_json['curr_coordinates']
+    merchant_id = request_json['merchant_id']
+
+    user = User.query.filter_by(accountId=accountId).first()
+
+    if user is None:
+        return json.dumps({'status': 0, 'error': "The provided account does not exist."})
+
+    # Get Merchant Details using Nessie
+
+    if user.isParent:
+        # Process transaction using Nessie
+        pass
+    else:
+        all_restrictions = Restriction.query.filter_by(user_id=user.id)
+
+        cat_check = False
+        gps_check = False
+
+        for restriction in all_restrictions:
+            if not satisfy_amount_condition(restriction, amount, curr_coordinates):
+                return json.dumps({'status': 0, 'error': "Card Restricted"})
+            if restriction.cat_id in merchant_cats and not cat_check:
+                cat_check = True
+            if satisfy_gps_condition(restriction, curr_coordinates) and not gps_check:
+                gps_check = True
+
+        if check:
+            # Process transaction using Nessie
+        else:
+            return json.dumps({'status': 0, 'error': "Card Restricted"})
+
+    return json.dumps({'status': 1})

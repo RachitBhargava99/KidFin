@@ -11,7 +11,7 @@ users = Blueprint('users', __name__)
 @users.route('/login', methods=['GET', 'POST'])
 def login():
     request_json = request.get_json()
-    if request_json['isSnap']:
+    if request_json.get('isSnap'):
         display_name = request_json['display_name']
         snap_pic = request_json['snap_pic']
         user = User.query.filter_by(name=display_name, snapPic=snap_pic).first()
@@ -21,7 +21,7 @@ def login():
                 'auth_token': user.get_auth_token(),
                 'name': user.name,
                 'email': user.email,
-                'isAdmin': user.isAdmin,
+                'isParent': user.isParent,
                 'status': 1
             }
             return json.dumps(final_dict)
@@ -36,7 +36,7 @@ def login():
             'auth_token': user.get_auth_token(),
             'name': user.name,
             'email': user.email,
-            'isAdmin': user.isAdmin,
+            'isParent': user.isParent,
             'status': 1
         }
         return json.dumps(final_dict)
@@ -49,12 +49,13 @@ def login():
 
 
 # End-point to enable a user to register on the website
-@users.route('/register', methods=['GET', 'POST'])
+@users.route('/register', methods=['POST'])
 def normal_register():
     request_json = request.get_json()
-    if request_json['isSnap']:
+    print(request_json)
+    if request_json.get('isSnap'):
         user = User(email="snapchat@snapchat.com", password="password", name=request_json['name'], isSnap=True,
-                    snapPic=request_json['snapPic'], isAdmin=False)
+                    snapPic=request_json['snapPic'])
         db.session.add(user)
         db.session.commit()
         return json.dumps({'id': user.id, 'status': 1})
@@ -65,7 +66,7 @@ def normal_register():
     hashed_pwd = bcrypt.generate_password_hash(request_json['password']).decode('utf-8')
     name = request_json['name']
     # noinspection PyArgumentList
-    user = User(email=email, password=hashed_pwd, name=name, isAdmin=False)
+    user = User(email=email, password=hashed_pwd, name=name)
     db.session.add(user)
     db.session.commit()
     return json.dumps({'id': user.id, 'status': 1})
