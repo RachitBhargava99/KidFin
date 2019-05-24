@@ -25,7 +25,7 @@ def satisfy_gps_condition(restriction, coordinates):
     return restriction.distance >= distance
 
 
-def get_merchant_category(merchantID):
+def get_merchant_information(merchantID):
     #   Purpose: Returns categories merchant belongs to in a list
     #
     #   Inputs:
@@ -33,9 +33,9 @@ def get_merchant_category(merchantID):
 
     url = "http://api.reimaginebanking.com/merchants/59394f0aceb8abe242517929?key=bb72fd1c5dee869a93bd5c6ba281cadb"
 
-    response = requests.get(url)
+    response = requests.get(url).json()
 
-    return (response.json())["category"]
+    return response["category"], [response['geocode']['lat'], response['geocode']['lng']]
 
 
 def process_purchase(accountID, merchantID, amount, date=datetime.now().strftime('%Y-%d-%m')):

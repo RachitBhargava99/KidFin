@@ -8,7 +8,7 @@ from flask_mail import Message
 import random
 import string
 import bcrypt
-from backend.transactions.utils import satisfy_amount_condition, satisfy_gps_condition, get_merchant_category,\
+from backend.transactions.utils import satisfy_amount_condition, satisfy_gps_condition, get_merchant_information,\
     process_purchase
 
 transactions = Blueprint('transactions', __name__)
@@ -81,6 +81,8 @@ def process_transaction():
     Special Restrictions
     --------------------
     User must be logged in
+    Account restrictions must not prevent the transaction
+    Account must have enough funds for the transaction
 
     JSON Parameters
     ---------------
@@ -88,6 +90,8 @@ def process_transaction():
         Account ID to debit
     amount : double
         Amount to debit
+    merchant_id : str
+        ID of merchant initiating the transaction
 
     Returns
     -------
@@ -100,7 +104,6 @@ def process_transaction():
 
     accountId = request_json['accountId']
     amount = request_json['amount']
-    curr_coordinates = request_json['curr_coordinates']
     merchant_id = request_json['merchant_id']
 
     user = User.query.filter_by(accountId=accountId).first()
@@ -109,7 +112,7 @@ def process_transaction():
         return json.dumps({'status': 0, 'error': "The provided account does not exist."})
 
     # Get Merchant Details using Nessie
-    merchant_cats = get_merchant_category(merchant_id)
+    merchant_cats, curr_coordinates = get_merchant_information(merchant_id)
 
     if user.isParent:
         # Process transaction using Nessie
