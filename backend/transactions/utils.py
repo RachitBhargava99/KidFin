@@ -32,7 +32,7 @@ def transferMoney(payer_accountID, payee_accountID, amount, date = "2019-05-24")
     #   payee_accountID (string)
     #   amount (string)
     #   date (optional string: YYYY-DD-MM)
-    #   assumptions- medium: balance, status: pending, description: ""
+    #   assumptions- medium: balance, status: pending, description: " "
 
     url = "http://api.reimaginebanking.com/accounts/" + payer_accountID + "/transfers?key=bb72fd1c5dee869a93bd5c6ba281cadb"
 
@@ -85,5 +85,30 @@ def processPurchase(accountID, merchantID, amount, date = "2019-05-24"):
     }
 
     response = requests.get(url)
+
+    return response.text
+
+
+def addAccount(customerID, accountName, balance, accountNumber):
+    #   Purpose: Creates an account with a given customerID
+    #
+    #   Inputs:
+    #   customerID (string)
+    #   account_name (string)
+    #   balance (integer)
+    #   account_number (string) - a 16 digit string that is essentially the 'credit card number'; make it anything
+    #   assumptions- type: checking, rewards: 0
+
+    url = "http://api.reimaginebanking.com/customers/" + customerID + "/accounts?key=bb72fd1c5dee869a93bd5c6ba281cadb"
+
+    payload = {
+        "type": "Checking",
+        "nickname": accountName,
+        "rewards": 0,
+        "balance": balance,
+        "account_number": accountNumber
+    }
+
+    response = requests.post(url, json=payload)
 
     return response.text
