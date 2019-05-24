@@ -25,33 +25,7 @@ def satisfy_gps_condition(restriction, coordinates):
     return restriction.distance >= distance
 
 
-def transferMoney(payer_accountID, payee_accountID, amount, date = "2019-05-24"):
-    #   Purpose: Transfers money from payer to payee
-    #
-    #   Inputs:
-    #   payer_accountID (string)
-    #   payee_accountID (string)
-    #   amount (string)
-    #   date (optional string: YYYY-DD-MM)
-    #   assumptions- medium: balance, status: pending, description: " "
-
-    url = "http://api.reimaginebanking.com/accounts/" + payer_accountID + "/transfers?key=bb72fd1c5dee869a93bd5c6ba281cadb"
-
-    payload = {
-        "medium": "balance",
-        "payee_id": payee_accountID,
-        "amount": amount,
-        "transaction_date": date,
-        "status": "pending",
-        "description": " "
-    }
-
-    response = requests.post(url, json=payload)
-
-    return response.text
-
-
-def getMerchantCategory(merchantID):
+def get_merchant_category(merchantID):
     #   Purpose: Returns categories merchant belongs to in a list
     #
     #   Inputs:
@@ -64,7 +38,7 @@ def getMerchantCategory(merchantID):
     return (response.json())["category"]
 
 
-def processPurchase(accountID, merchantID, amount, date = "2019-05-24"):
+def process_purchase(accountID, merchantID, amount, date=datetime.now().strftime('%Y-%d-%m')):
     #   Purpose: Processes the purchase between the account and merchant
     #
     #   Inputs:
@@ -85,9 +59,9 @@ def processPurchase(accountID, merchantID, amount, date = "2019-05-24"):
         "description": " "
     }
 
-    response = requests.get(url)
+    response = requests.post(url, json=payload)
 
-    return response.text
+    return response.json()['code'] == 201
 
 
 def addAccount(customerID, accountName, balance, accountNumber):
