@@ -65,8 +65,10 @@ def normal_register():
     email = request_json['email']
     hashed_pwd = bcrypt.generate_password_hash(request_json['password']).decode('utf-8')
     name = request_json['name']
+    account_id = request_json.get('account_id')
+    customer_id = request_json.get('customer_id')
     # noinspection PyArgumentList
-    user = User(email=email, password=hashed_pwd, name=name)
+    user = User(email=email, password=hashed_pwd, name=name, accountId=account_id, customerId=customer_id)
     db.session.add(user)
     db.session.commit()
     return json.dumps({'id': user.id, 'status': 1})
