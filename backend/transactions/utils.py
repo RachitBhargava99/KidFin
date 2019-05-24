@@ -169,6 +169,6 @@ def getPurchaseData(accountID):
 
     for i in range(len(response.json())):
         merchantID = response.json()[i]["merchant_id"]
-        purchaseDataList += [[getMerchantName(merchantID), response.json()[i]["amount"]]]
+        purchaseDataList += [[getMerchantName(merchantID), response.json()[i]["amount"], response.json()[i]["purchase_date"]]]
 
     return purchaseDataList
