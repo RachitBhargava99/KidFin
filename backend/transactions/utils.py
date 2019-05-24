@@ -24,7 +24,7 @@ def satisfy_gps_condition(restriction, coordinates):
     return restriction.distance >= distance
 
 
-def transferMoney(payer_accountID, payee_accountID, amount, date = "2019-05-23"):
+def transferMoney(payer_accountID, payee_accountID, amount, date = "2019-05-24"):
     #   Purpose: Transfers money from payer to payee
     #
     #   Inputs:
@@ -61,3 +61,29 @@ def getMerchantCategory(merchantID):
     response = requests.get(url)
 
     return (response.json())["category"]
+
+
+def processPurchase(accountID, merchantID, amount, date = "2019-05-24"):
+    #   Purpose: Processes the purchase between the account and merchant
+    #
+    #   Inputs:
+    #   accountID (string)
+    #   merchantID (string)
+    #   amount (string)
+    #   date (optional string: YYYY-DD-MM)
+    #   assumptions- medium: balance, status: pending, description: " "
+
+    url = "http://api.reimaginebanking.com/accounts/" + accountID + "/purchases?key=bb72fd1c5dee869a93bd5c6ba281cadb"
+
+    payload = {
+        "merchant_id": merchantID,
+        "medium": "balance",
+        "purchase_date": date,
+        "amount": amount,
+        "status": "pending",
+        "description": " "
+    }
+
+    response = requests.get(url)
+
+    return response.text
