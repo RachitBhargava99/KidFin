@@ -85,9 +85,9 @@ def process_transaction():
 
     JSON Parameters
     ---------------
-    accountId : str
+    account_id : str
         Account ID to debit
-    amount : double
+    amount : int
         Amount to debit
     merchant_id : str
         ID of merchant initiating the transaction
@@ -101,11 +101,11 @@ def process_transaction():
     """
     request_json = request.get_json()
 
-    accountId = request_json['accountId']
+    account_id = request_json['account_id']
     amount = request_json['amount']
     merchant_id = request_json['merchant_id']
 
-    user = User.query.filter_by(accountId=accountId).first()
+    user = User.query.filter_by(accountId=account_id).first()
 
     if user is None:
         return json.dumps({'status': 0, 'error': "The provided account does not exist."})

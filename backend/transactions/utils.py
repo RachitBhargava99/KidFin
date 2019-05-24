@@ -31,7 +31,7 @@ def get_merchant_information(merchantID):
     #   Inputs:
     #   merchantID (string)
 
-    url = "http://api.reimaginebanking.com/merchants/59394f0aceb8abe242517929?key=bb72fd1c5dee869a93bd5c6ba281cadb"
+    url = f"http://api.reimaginebanking.com/merchants/{merchantID}?key=bb72fd1c5dee869a93bd5c6ba281cadb"
 
     response = requests.get(url).json()
 
